@@ -7,7 +7,7 @@ import mediapipe as mp
 # - PAUSE: index + middle birlikte yukarı
 # - PLAY: başparmak dik ve diğerleri kapalı
 # - FORWARD/REWIND: başparmak yana doğru ve diğer parmaklar kapalı
-# - FULLSCREEN: index/middle/ring/pinky açık ve parmaklar yeterince yayılmış (kapalı yumruk tetiklemez)
+# - FULLSCREEN: Tüm parmaklar açık
 # - EXIT_FULLSCREEN: tüm parmaklar kapalı
 FINGER_TIPS = [4, 8, 12, 16, 20]
 FINGER_PIPS = [2, 6, 10, 14, 18]
