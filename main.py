@@ -7,7 +7,7 @@ import mediapipe as mp
 # - PAUSE: index + middle birlikte yukarı
 # - PLAY: başparmak dik ve diğerleri kapalı
 # - FORWARD/REWIND: başparmak yana doğru ve diğer parmaklar kapalı
-# - FULLSCREEN: index/middle/ring/pinky açık ve parmaklar yeterince yayılmış (kapalı yumruk tetiklemez)
+# - FULLSCREEN: Tüm parmaklar açık
 # - EXIT_FULLSCREEN: tüm parmaklar kapalı
 FINGER_TIPS = [4, 8, 12, 16, 20]
 FINGER_PIPS = [2, 6, 10, 14, 18]
@@ -152,9 +152,9 @@ else:
                 ups = fingers_up(hand)
 
                 cv2.putText(frame, f"ups:{ups}", (10, 90),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.6, (31, 255, 255), 2)
                 cv2.putText(frame, f"Last:{detector.last_action}", (10, 120),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.6, (200, 200, 0), 2)
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.6, (31, 200, 0), 2)
 
                 if detector.detect_activation(ups, hand) and not detector.active:
                     detector.active = True
