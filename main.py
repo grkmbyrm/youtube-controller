@@ -171,23 +171,22 @@ else:
                     thumb_dir = thumb_lateral_direction(hand)
                     thumb_vertical = is_thumb_vertical(hand)
 
-                    if not any(ups[1:]) and other_fingers_folded(hand) and not thumb_vertical and thumb_dir == 'RIGHT' and detector.can_fire('REWIND'):
-                        detector.fire('REWIND')
+                    if ups[1] and not ups[2] and not ups[3] and not ups[4] and detector.can_fire('VOLUME_UP'):
+                        detector.fire('VOLUME_UP')
+                    elif ups[4] and not ups[1] and not ups[2] and not ups[3] and detector.can_fire('VOLUME_DOWN'):
+                        detector.fire('VOLUME_DOWN')
+                    elif ups[1] and ups[2] and not ups[3] and not ups[4] and detector.can_fire('PAUSE'):
+                        detector.fire('PAUSE')
+                    elif thumb_vertical and not any(ups[1:]) and detector.can_fire('PLAY'):
+                        detector.fire('PLAY')
                     elif not any(ups[1:]) and other_fingers_folded(hand) and not thumb_vertical and thumb_dir == 'LEFT' and detector.can_fire('FORWARD'):
                         detector.fire('FORWARD')
-                    elif ups == [True, False, False, False, False] and thumb_vertical and detector.can_fire('PLAY'):
-                        detector.fire('PLAY')
-                    elif all(ups[i] for i in [1,2,3,4]) and detector.can_fire('FULLSCREEN'):
+                    elif not any(ups[1:]) and other_fingers_folded(hand) and not thumb_vertical and thumb_dir == 'RIGHT' and detector.can_fire('REWIND'):
+                        detector.fire('REWIND')
+                    elif all(ups) and detector.can_fire('FULLSCREEN'):
                         detector.fire('FULLSCREEN')
-
-                    elif not any(ups) and detector.can_fire('EXIT_FULLSCREEN'):
+                    elif not any(ups) and thumb_dir is None and detector.can_fire('EXIT_FULLSCREEN'):
                         detector.fire('EXIT_FULLSCREEN')
-                    elif ups[1] and ups[2] and not ups[2:] and not ups[0] and detector.can_fire('PAUSE'):
-                        detector.fire('PAUSE')
-                    elif ups == [False, True, False, False, False] and detector.can_fire('VOLUME_UP'):
-                        detector.fire('VOLUME_UP')
-                    elif ups == [False, False, False, False, True] and detector.can_fire('VOLUME_DOWN'):
-                        detector.fire('VOLUME_DOWN')
 
             else:
                 if time.time() - detector.last_seen > detector.hand_timeout:
