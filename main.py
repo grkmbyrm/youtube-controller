@@ -1,6 +1,7 @@
 import time
 import cv2
 import mediapipe as mp
+import pyautogui
 
 # - VOLUME_UP: işaret parmak tek başına yukarıdaysa (diğer parmaklar kapalı)
 # - VOLUME_DOWN: serçe parmak (pinky) tek başına yukarıdaysa
@@ -81,6 +82,11 @@ class GestureDetector:
         self.hand_timeout = 2.0
         self.last_volume_time = 0
 
+        self.last_palm_pos = None
+        self.last_pos_time = None
+        self.seek_speed_threshold = 1.0
+        self.volume_speed_threshold = 0.8
+
     def update(self):
         self.last_seen = time.time()
 
@@ -121,7 +127,60 @@ class GestureDetector:
             self.last_volume_time = now
 
         print(action)
+
+        try:
+            if action == 'VOLUME_UP':
+                pyautogui.press('up')
+            elif action == 'VOLUME_DOWN':
+                pyautogui.press('down')
+            elif action == 'PAUSE' or action == 'PLAY':
+                pyautogui.press('k')
+            elif action == 'FORWARD':
+                pyautogui.press('right')
+            elif action == 'REWIND':
+                pyautogui.press('left')
+            elif action == 'FULLSCREEN' or action == 'EXIT_FULLSCREEN':
+                pyautogui.press('f')
+        except Exception:
+            pass
+
         return True
+
+    def handle_movement(self, palm_x, palm_y):
+        now = time.time()
+        if self.last_palm_pos is None or self.last_pos_time is None:
+            self.last_palm_pos = (palm_x, palm_y)
+            self.last_pos_time = now
+            return
+
+        dt = now - self.last_pos_time
+        if dt <= 0:
+            return
+
+        dx = palm_x - self.last_palm_pos[0]
+        dy = palm_y - self.last_palm_pos[1]
+        speed_x = dx / dt
+        speed_y = dy / dt
+
+        if abs(speed_x) > self.seek_speed_threshold:
+            if speed_x > 0 and self.can_fire('FORWARD'):
+                self.fire('FORWARD')
+            elif speed_x < 0 and self.can_fire('REWIND'):
+                self.fire('REWIND')
+
+        if abs(speed_y) > self.volume_speed_threshold:
+            if speed_y < 0 and self.can_fire('VOLUME_UP'):
+                self.fire('VOLUME_UP')
+            elif speed_y > 0 and self.can_fire('VOLUME_DOWN'):
+                self.fire('VOLUME_DOWN')
+
+        self.last_palm_pos = (palm_x, palm_y)
+        self.last_pos_time = now
+
+
+# pyautogui ayarları
+pyautogui.FAILSAFE = False
+pyautogui.PAUSE = 0
 
 
 detector = GestureDetector()
@@ -156,6 +215,9 @@ else:
                 cv2.putText(frame, f"Last:{detector.last_action}", (10, 120),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.6, (31, 200, 0), 2)
 
+                palm = hand.landmark[0]
+                palm_x, palm_y = palm.x, palm.y
+
                 if detector.detect_activation(ups, hand) and not detector.active:
                     detector.active = True
                     detector.activation_time = time.time()
@@ -167,6 +229,8 @@ else:
                         detector.active = False
 
                 if detector.active:
+
+                    detector.handle_movement(palm_x, palm_y)
 
                     thumb_dir = thumb_lateral_direction(hand)
                     thumb_vertical = is_thumb_vertical(hand)
